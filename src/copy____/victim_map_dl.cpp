@@ -30,7 +30,7 @@ void victim_map_DL::Update(){
   D_loc[1]=detect_loc_.y;
   D_loc=approximate_detect(D_loc);
 
-  DL_status.victim_found=false; //initialize detection to false
+  victim_found=false; //initialize detection to false
 
   for (grid_map::PolygonIterator iterator(map, polygon);
        !iterator.isPastEnd(); ++iterator) {
@@ -45,10 +45,9 @@ void victim_map_DL::Update(){
       if (is_detect_== true && P_prior>0.01 ) {
         double Detec_prob=(Prob_D_H* P_prior)/((Prob_D_H* P_prior)+(Prob_D_Hc* (1-P_prior)));
         map.at(layer_name, index)= Detec_prob;
-        if (Detec_prob>0.98) {
-          std::cout << "Detec_prob" << std::endl;
-          DL_status.victim_found=true;
-          DL_status.victim_loc=position;
+        if (Detec_prob>0) {
+          victim_found=true;
+          victim_loc=position;
         }
       }
 
@@ -62,9 +61,12 @@ void victim_map_DL::Update(){
   publish_Map();
 }
 
-detector_status victim_map_DL::getDetectionStatus(){
-  return DL_status;
+bool getDetectionStatus(){
+  return victim_found;
 }
+
+
+
 
 
 

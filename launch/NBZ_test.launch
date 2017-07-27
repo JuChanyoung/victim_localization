@@ -1,0 +1,17 @@
+<launch>
+  <!-- Launch the grid map simple demo node -->
+
+
+  <node pkg="victim_localization" type="test_NBZ" name="test_NBZ" output="screen" />
+  <!-- Launch the grid map visualizer -->
+  <node pkg="grid_map_visualization" type="grid_map_visualization" name="grid_map_visualization" output="screen">
+    <rosparam command="load" file="$(find victim_localization)/config/victim_Map_DL.yaml" />
+  </node>
+
+<!-- Launch RViz with the demo configuration -->
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find victim_localization)/rviz/test_NBZ.rviz" /> 
+
+
+ <!-- <node pkg="tf" type="static_transform_publisher" name="_to_map_link" args="0 0 0 0 0 0  /map /world 500"/>  --> 
+
+</launch>

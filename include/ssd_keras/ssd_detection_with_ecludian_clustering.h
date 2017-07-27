@@ -6,6 +6,8 @@
 #include <ros/package.h>
 #include <iostream>
 
+#include <string>
+
 #include <Eigen/Geometry>
 #include <sensor_msgs/PointCloud2.h>
 
@@ -66,10 +68,9 @@ public:
   victim_localization::DL_msgs_boxes current_ssd_detection;
   geometry_msgs::Pose current_pose;
   geometry_msgs::Point detected_point;
-  std::string detection_status; // start , repeat , or success
+  bool detection_status_; //
   ros::Publisher pub_segemented_human_pointcloud;
 
-protected:
   tf::TransformListener *tf_listener;
   typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image,victim_localization::DL_msgs_boxes,geometry_msgs::PoseStamped> MySyncPolicy;
   message_filters::Subscriber<sensor_msgs::Image> *depth_in_;
@@ -81,10 +82,9 @@ protected:
   void CallBackData(const sensor_msgs::ImageConstPtr& input_depth, const victim_localization::DL_msgs_boxesConstPtr& boxes_,
                     const geometry_msgs::PoseStamped::ConstPtr& loc);
   void FindClusterCentroid();
-  std::string getClusterCentroidResultStatus();
+  bool getClusterCentroidResultStatus();
   geometry_msgs::Point getClusterCentroid();
   void PublishSegmentedPointCloud(const pcl::PointCloud<pcl::PointXYZ> input_PointCloud);
-
 };
 
 #endif // SSD_DETECTION_H

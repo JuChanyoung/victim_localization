@@ -8,7 +8,7 @@ VehicleControlBase::VehicleControlBase():
   ros::param::param("~distance_threshold", distance_threshold_, 0.4);
   ros::param::param("~angular_threshold", angular_threshold_, DEG2RAD(10.0));
   ros::param::param("~linear_speed_threshold", linear_speed_threshold_, 0.05);
-  ros::param::param("~angular_speed_threshold", angular_speed_threshold_, 0.03);
+  ros::param::param("~angular_speed_threshold", angular_speed_threshold_, 0.1);  //before 0.03
 }
 
 
@@ -26,6 +26,12 @@ geometry_msgs::Point VehicleControlBase::getPosition()
 {
   return vehicle_current_pose_.position;
 }
+
+mavros_msgs::State VehicleControlBase::getState()
+{
+  return vehicle_current_state_;
+}
+
 
 geometry_msgs::Quaternion VehicleControlBase::getOrientation()
 {
@@ -60,6 +66,8 @@ double VehicleControlBase::getAngularDistance(geometry_msgs::Pose p1, geometry_m
   else if (yaw_diff < -M_PI)
     yaw_diff = yaw_diff + 2*M_PI;
 
+  //std::cout << yaw1 << " " << yaw2 <<std::endl;
+  //std::cout << "yaw_diff: " << yaw_diff <<std::endl;
   return yaw_diff;
 }
 
@@ -73,6 +81,11 @@ bool VehicleControlBase::isNear(double p1, double p2, double threshold_sensitivi
 }
 
 bool VehicleControlBase::isNear(const geometry_msgs::Pose p_target, const geometry_msgs::Pose p_current, double threshold_sensitivity){
+
+  // std::cout << fabs(getAngularDistance(p_target, p_current)) << "< " <<  angular_threshold_*threshold_sensitivity << std::endl;
+  // std::cout << getDistance(p_target, p_current) << "< " <<  distance_threshold_*threshold_sensitivity << std::endl;
+  // std::cout << "theshold Dis: " << threshold_sensitivity << std::endl;
+
   if (
     getDistance(p_target, p_current) < distance_threshold_*threshold_sensitivity &&
     fabs(getAngularDistance(p_target, p_current)) < angular_threshold_*threshold_sensitivity )

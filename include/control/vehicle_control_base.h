@@ -4,6 +4,9 @@
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/PoseStamped.h>
+#include <mavros_msgs/CommandBool.h>
+#include <mavros_msgs/SetMode.h>
+#include <mavros_msgs/State.h>
 
 #include "victim_localization/common.h"
 
@@ -20,11 +23,14 @@ public:
 
   geometry_msgs::Pose  vehicle_current_pose_;
   geometry_msgs::Twist vehicle_current_twist_;
+  mavros_msgs::State vehicle_current_state_;
+
   geometry_msgs::Pose setpoint_;
 
   VehicleControlBase();
   virtual void initialize(){};
   virtual void start(){};
+  virtual void setOffboardState(geometry_msgs::PoseStamped ps){};
   virtual bool isReady(){};
   virtual bool isStationary(double threshold_sensitivity){};
   virtual void setSpeed(double speed){};
@@ -38,6 +44,8 @@ public:
   geometry_msgs::Point getPosition();
   geometry_msgs::Quaternion getOrientation();
   double getYaw();
+  mavros_msgs::State getState();
+
 
   double getAngularDistance(geometry_msgs::Pose p1, geometry_msgs::Pose p2);
   double getDistance(geometry_msgs::Pose p1, geometry_msgs::Pose p2);

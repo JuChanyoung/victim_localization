@@ -129,15 +129,14 @@ void Victim_Map_Base::setDetectionResult(Point p, bool is_detect) {
   is_detect_=is_detect;
 }
 
+ bool getDetectionStatus()
+ {
+   std::cout << "[Warning] Detection Checking not implemened in Based Map Module\n";
+  }
 
-detector_status Victim_Map_Base::getDetectionStatus(){
-  std::cout << "[Warning] detection_Checking is not implemented in the Base Mapping Module" << std::endl;
-  detector_status status;
-  status.victim_found=false;
-   status.victim_loc=Position(std::numeric_limits<double>::quiet_NaN(),
-                              std::numeric_limits<double>::quiet_NaN());
-   return status;
-}
+
+
+
 
 
 

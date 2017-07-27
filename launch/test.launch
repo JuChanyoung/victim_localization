@@ -54,7 +54,7 @@
     <param name="robot_description" textfile="$(find victim_localization)/urdf/$(arg vehicle)/iris_with_sensors.urdf"/>
 
     <node name="spawn_m" output="screen" pkg="gazebo_ros" type="spawn_model" 
-        args="-urdf -param /robot_description -model iris_drone -x $(arg x) -y $(arg y) -z $(arg z) -R $(arg R) -P $(arg P) -Y $(arg Y) -robot_namespace $(arg ns)"/>
+        args="-urdf -param /robot_description -model iris_drone -x $(arg x) -y $(arg y) -z $(arg z) -R $(arg R) -P $(arg P) -Y $(arg Y)"/>
 
 
       <!-- send the robot XML to param server -->
@@ -66,6 +66,8 @@
 
 
    <node pkg="tf" type="static_transform_publisher" name="world_to_base_link" args="0 0 0 0 0 0 /ground_truth//ground_truth/odometry_sensorgt_link /base_link 500"/>
+
+   <node pkg="tf" type="static_transform_publisher" name="world_to_map" args="0 0 0 0 0 0 /world /map 500"/>
 
 </launch>
 

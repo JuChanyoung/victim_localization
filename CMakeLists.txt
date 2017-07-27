@@ -134,8 +134,7 @@ include_directories(
     include #Adds my own custom class headers
     include/vicitm_localization
     include/control
-
-
+    include/keras
 )
 link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
@@ -144,22 +143,32 @@ link_libraries(${OCTOMAP_LIBRARIES})
 
 ## add executable
 
-add_executable (test_f
-    src/test_flight.cpp
+add_executable (test_NBZ
+    src/test_NBZ.cpp
     src/victim_map_base.cpp
     src/victim_map_dl.cpp
     src/control/vehicle_control_base.cpp
     src/control/vehicle_control_iris.cpp
+    src/view_evaluator_ig.cpp
+    src/view_generator_ig.cpp
+    src/ssd_detection_with_ecludian_clustering.cpp
     )
-add_dependencies(test_f ${catkin_EXPORTED_TARGETS})
+add_dependencies(test_NBZ ${catkin_EXPORTED_TARGETS})
 
-target_link_libraries(test_f
+target_link_libraries(test_NBZ
     ${Boost_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} ${Boost_DATE_TIME_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
     ${catkin_LIBRARIES}
     ${Eigen_LIBRARIES}
     ${OCTOMAP_LIBRARIES}
     ${PCL_LIBRARIES}
 )
+
+add_executable(takeoff src/takeoff.cpp)
+target_link_libraries(takeoff ${catkin_LIBRARIES})
+
+#add_executable(ff src/takeoff.cpp)
+#target_link_libraries(takeoff ${catkin_LIBRARIES})
+
 
 #add_executable (cluster_ src/ssd_detection_with_ecludian_clustering.cpp)
 #add_dependencies(cluster_  ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_generate_messages_cpp ${catkin_EXPORTED_TARGETS})

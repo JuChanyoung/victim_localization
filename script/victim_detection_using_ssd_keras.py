@@ -20,7 +20,7 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 
 import sys
-sys.path.append('/home/abdulrahman/catkin_ws1/src/victim_localization/resources/ssd_keras')
+sys.path.append('/home/abdulrahman/catkin_ws/src/victim_localization/resources/ssd_keras')
 from ssd_utils import BBoxUtility
 from ssd import SSD300 as SSD
 
@@ -37,7 +37,7 @@ class ssdKeras():
         self.num_classes = len(self.class_names)
         self.input_shape = (300,300,3)
         self.model = SSD(self.input_shape,num_classes=self.num_classes)
-        self.model.load_weights('/home/abdulrahman/catkin_ws1/src/victim_localization/resources/ssd_keras/weights_SSD300.hdf5')
+        self.model.load_weights('/home/abdulrahman/catkin_ws/src/victim_localization/resources/ssd_keras/weights_SSD300.hdf5')
 
         self.bbox_util = BBoxUtility(self.num_classes)
         self.conf_thresh = 0.4
@@ -45,7 +45,7 @@ class ssdKeras():
         self.model._make_predict_function()
         self.graph = tf.get_default_graph()
 
-        self.detection_index=boxes()
+        self.detection_index=DL_msgs_boxes()
 
         # Create unique and somewhat visually distinguishable bright
         # colors for the different classes.
@@ -63,9 +63,9 @@ class ssdKeras():
 
         self.bridge = CvBridge() # Create the cv_bridge object
 
-        self.image_sub = rospy.Subscriber("iris/front_cam/rgb/image_raw", Image, self.detect_image,queue_size=1)  # the appropriate callbacks
+        self.image_sub = rospy.Subscriber("front_cam/rgb/image_raw", Image, self.detect_image,queue_size=1)  # the appropriate callbacks
 
-        self.box_coordinate_pub = rospy.Publisher("/ssd_detction/box", boxes ,queue_size=5)  # the appropriate callbacks
+        self.box_coordinate_pub = rospy.Publisher("/ssd_detction/box", DL_msgs_boxes ,queue_size=5)  # the appropriate callbacks
     def detect_image(self, ros_image):
         """ Runs the test on a video (or webcam)
 
@@ -133,7 +133,7 @@ class ssdKeras():
             top_ymax = det_ymax[top_indices]
 
             #initiaze the detection msgs
-            box_msg = box()
+            box_msg = DL_msgs_box()
             box_msg.xmin=0
             box_msg.ymin=0
             box_msg.xmax=0
@@ -151,7 +151,7 @@ class ssdKeras():
                     ymax = int(round(top_ymax[i] * to_draw.shape[0]))
 
                     #include the corner to be published
-                    box_msg = box()
+                    box_msg = DL_msgs_box()
                     box_msg.xmin=xmin
                     box_msg.ymin=ymin
                     box_msg.xmax=xmax

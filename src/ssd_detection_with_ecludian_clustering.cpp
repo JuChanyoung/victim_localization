@@ -3,7 +3,7 @@
 SSD_Detection_with_clustering::SSD_Detection_with_clustering()
 {
 
-detection_status="Starting";
+detection_status_=false;
 
 tf_listener = new tf::TransformListener();
 ros::NodeHandle nh_;
@@ -16,7 +16,7 @@ std::string topic_segmented_PointCloud;
 
 
 ros::param::param("~topic_ssd_keras", topic_ssd_keras, std::string("/ssd_detction/box"));
-ros::param::param("~topic_depth_image", topic_depth_image, std::string("iris/front_cam/depth/image_raw"));
+ros::param::param("~topic_depth_image", topic_depth_image, std::string("front_cam/depth/image_raw"));
 ros::param::param("~topic_Odometry", topic_Odometry, std::string("iris/mavros/local_position/pose"));
 ros::param::param("~topic_segmented_PointCloud", topic_segmented_PointCloud, std::string("ssd/segmented_PointCloud"));
 
@@ -52,7 +52,6 @@ void SSD_Detection_with_clustering::CallBackData(const sensor_msgs::ImageConstPt
 
   current_pose= loc->pose;
   current_ssd_detection= *boxes_;
-
 }
 
 
@@ -62,13 +61,14 @@ void SSD_Detection_with_clustering::FindClusterCentroid(){  //TOFIX:: this code 
   pcl::PointCloud<pcl::PointXYZ>::Ptr filtered_cloud (new pcl::PointCloud<pcl::PointXYZ>);
   pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_f (new pcl::PointCloud<pcl::PointXYZ>);
 
+  detection_status_= false; //initialized detection status to start
 
-  detection_status= "Starting"; //initialized detection status to start
 
   if (!DetectionAvailable()) {
-    std::cout << "[Msg:->] " << cc.red << "ERROR: Attempt to evaluate Detection but Non is Available\n" << cc.reset;
+    std::cout << "[Detection_Status:->] " << cc.yellow << "No Human is detected yet\n" << cc.reset;
     return;
    }
+  else  std::cout << "[Detection_Status:->] " << cc.red << "A Human is detected \n" << cc.reset;
 
       int y_max=current_ssd_detection.boxes[0].ymax;
       int y_min=current_ssd_detection.boxes[0].ymin;
@@ -150,7 +150,7 @@ void SSD_Detection_with_clustering::FindClusterCentroid(){  //TOFIX:: this code 
 
 
       if (!filtered_cloud->points.size()) {  // if filtered_cloud size is zero, we should try again with new input cloud data
-        detection_status="repeat";
+        //detection_status="repeat";
         return;
           }
 
@@ -186,21 +186,14 @@ void SSD_Detection_with_clustering::FindClusterCentroid(){  //TOFIX:: this code 
       }
 
 
-      // == convert max pcl cloud back to pointcloud2 and publish it
-       sensor_msgs::PointCloud2 output_msg;
-       pcl::toROSMsg(*cloud_clusters[0], output_msg); 	//cloud of original (white) using original cloud
-        output_msg.header.frame_id = "front_cam_depth_optical_frame";
-        output_msg.header.stamp = ros::Time::now();
-        pub_segemented_human_pointcloud.publish(output_msg);
-
      // getting the centroid of the cluster in world frame
-        pcl::PointCloud<pcl::PointXYZ>::Ptr temp_cloud (new pcl::PointCloud<pcl::PointXYZ>);
-        temp_cloud=cloud_clusters[0];
+        pcl::PointCloud<pcl::PointXYZ> temp_cloud;
+        temp_cloud=*cloud_clusters[0];
         pcl::CentroidPoint<pcl::PointXYZ> centroid;
 
-        while (temp_cloud->points.size()) {
-            centroid.add(temp_cloud->points.back());
-            temp_cloud->points.pop_back();
+        while (temp_cloud.points.size()) {
+            centroid.add(temp_cloud.points.back());
+            temp_cloud.points.pop_back();
         }
 
         pcl::PointXYZ point_centroid;
@@ -222,14 +215,17 @@ void SSD_Detection_with_clustering::FindClusterCentroid(){  //TOFIX:: this code 
         }
 
         detected_point = point_out.point;
-        detection_status= "success";
+        detection_status_= true;
 
-         PublishSegmentedPointCloud(*cloud_clusters[0]);
+        //std::cout << detected_point << std::endl;
+
+        //PublishSegmentedPointCloud(*cloud_clusters[0]);
 
   }
 
 void SSD_Detection_with_clustering::PublishSegmentedPointCloud(const pcl::PointCloud<pcl::PointXYZ> input_PointCloud){
 
+   if (input_PointCloud.size()==0) return;
    sensor_msgs::PointCloud2 output_msg;
    pcl::toROSMsg(input_PointCloud, output_msg); 	//cloud of original (white) using original cloud
    output_msg.header.frame_id = "front_cam_depth_optical_frame";
@@ -248,19 +244,36 @@ geometry_msgs::Point SSD_Detection_with_clustering::getClusterCentroid(){
   return detected_point;
 }
 
+bool SSD_Detection_with_clustering::getClusterCentroidResultStatus()
+{
+  return detection_status_;
+}
+
+/*
+
 int main(int argc, char **argv)
 {
 // >>>>>>>>>>>>>>>>>
 // Initialize ROS
 // >>>>>>>>>>>>>>>>>
 ros::init(argc, argv, "clustering");
+ros::NodeHandle ros_node;
+ros::Rate rate(30);
 
 SSD_Detection_with_clustering *cluster;
 
-ros::spin();
+cluster= new SSD_Detection_with_clustering();
+
+while (ros::ok) {
+  cluster->FindClusterCentroid();
+  std::cout << "status: " << cluster->detection_status << "\n";
+     ros::spinOnce();
+      rate.sleep() ;
+}
 
 return 0;
 
 }
 
+*/
 

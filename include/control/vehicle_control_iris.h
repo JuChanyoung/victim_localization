@@ -12,7 +12,11 @@ class VehicleControlIris : public VehicleControlBase
 {
 private:
   ros::Subscriber sub_odom;
+  ros::Subscriber sub_state;
+  ros::ServiceClient arming_client;
+  ros::ServiceClient set_mode_client;
   ros::Publisher  pub_setpoint;
+
 
   double uav_height_min_;
   double uav_height_max_;
@@ -23,9 +27,12 @@ public:
 //private:
 
   void callbackOdometry(const nav_msgs::Odometry& odom_msg);
+  void callbackState(const mavros_msgs::State& state_msg);
+
   bool isReady();
   bool isStationary(double threshold_sensitivity = 1);
 
+  void setOffboardState();
   void moveVehicle(double threshold_sensitivity = 1);
   void setSpeed(double speed);
   void setWaypoint(double x, double y, double z, double yaw);
